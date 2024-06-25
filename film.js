@@ -12,6 +12,7 @@ addEventListener('DOMContentLoaded', () => {
   episode = document.querySelector('span#episode');
   releaseDate = document.querySelector('span#relDate');
   director = document.querySelector('span#director');
+  summary = document.querySelector('span#summary');
   charactersUL = document.querySelector('#characters>ul');
   planetsUL = document.querySelector('#planets>ul');
   const sp = new URLSearchParams(window.location.search)
@@ -25,6 +26,7 @@ async function getFilm(id) {
     film = await fetchFilm(id)
     film.characters = await fetchCharacters(id)
     film.planets = await fetchPlanets(id)
+    
   }
   catch (ex) {
     console.error(`Error reading film ${id} data.`, ex.message);
@@ -33,10 +35,17 @@ async function getFilm(id) {
  
 }
 async function fetchFilm(id) {
-  let filmUrl = `${baseUrl}/films/${id}`;
-  return await fetch(filmUrl)
-    .then(res => res.json())
+  try {
+    const filmUrl = `${baseUrl}/films/${id}`;
+    const response = await fetch(filmUrl);
+    const data = await response.json();
+    console.log(data)
+    return data;
+  } catch (error) {
+    console.error('Error fetching the film:', error);
+  }
 }
+
  
 async function fetchCharacters(id) {
   const url = `${baseUrl}/films/${id}/characters`;
@@ -57,11 +66,12 @@ async function fetchPlanets(id) {
 }
  
 const renderFilm = film => {
-  document.title = `SWAPI - ${film?.name}`;  // Just to make the browser tab say their name
+  document.title = `SWAPI - ${film?.name}`; 
   titleH1.textContent = film?.title;
   episode.textContent = film?.episode_id;
   releaseDate.textContent = film?.release_date;
   director.textContent = film?.director;
+  summary.textContent = film?.opening_crawl;
   const charactersLis = film?.characters?.map(character => `<li><a href="/character.html?id=${character.id}">${character.name}</li>`)
   charactersUL.innerHTML = charactersLis.join("");
   const planetsLis = film?.planets?.map(planet => `<li><a href="/planet.html?id=${planet.id}">${planet.name}</li>`)
